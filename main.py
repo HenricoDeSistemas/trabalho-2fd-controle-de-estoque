@@ -1,6 +1,9 @@
 
-##Innovation Inc.: Controle de Estoque 
+##Empresa Ficticia: Innovation Inc:
+## Controle De Estoque
 
+
+#Etapa 1- Estoque
 
 supermercado_estoque = {
     1: "Arroz 5kg",
@@ -15,6 +18,8 @@ supermercado_estoque = {
     10: "Queijo Mussarela",
 }
 
+#Etapa 2- Organização
+
 prateleira_estoque = [
     [supermercado_estoque[codigo] for codigo in range(1, 6)],
     [supermercado_estoque[codigo] for codigo in range(6, 11)],
@@ -27,4 +32,17 @@ for numero_prateleira, prateleira in enumerate(prateleira_estoque, start=1):
         for numero_posicao, produto in enumerate(prateleira, start=1)
     )
     print(f"Prateleira {numero_prateleira}: {posicoes}")
+
+# Etapa 3- Menu
+
+print("\nMenu de acesso ao estoque:")
+for codigo, produto in supermercado_estoque.items():
+    print(f"{codigo} - {produto}")
+
+opcao = input("Digite um número de 1 a 10 para consultar o produto: ")
+
+if opcao.isdigit() and int(opcao) in supermercado_estoque:
+    print(f"Produto selecionado: {supermercado_estoque[int(opcao)]}")
+else:
+    print("Opção inválida. Digite um número de 1 a 10.")
 
