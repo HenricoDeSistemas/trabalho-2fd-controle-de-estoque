@@ -2,6 +2,19 @@
 ##Empresa Ficticia: Innovation Inc:
 ## Controle De Estoque
 
+import csv
+from pathlib import Path
+
+
+arquivo_dados = Path(__file__).with_name("dados.csv")
+with arquivo_dados.open(encoding="utf-8", newline="") as arquivo:
+    produtos_csv = [linha[0] for linha in csv.reader(arquivo) if linha]
+
+print(
+    "Lista de produtos em dados.csv:\n"
+    + "\n".join(f"- {produto}" for produto in produtos_csv),
+    flush=True,
+)
 
 #Etapa 1- Estoque
 
@@ -45,4 +58,3 @@ if opcao.isdigit() and int(opcao) in supermercado_estoque:
     print(f"Produto selecionado: {supermercado_estoque[int(opcao)]}")
 else:
     print("Opção inválida. Digite um número de 1 a 10.")
-
