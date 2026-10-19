@@ -6,16 +6,6 @@ import csv
 from pathlib import Path
 
 
-arquivo_dados = Path(__file__).with_name("dados.csv")
-with arquivo_dados.open(encoding="utf-8", newline="") as arquivo:
-    produtos_csv = [linha[0] for linha in csv.reader(arquivo) if linha]
-
-print(
-    "Lista de produtos em dados.csv:\n"
-    + "\n".join(f"- {produto}" for produto in produtos_csv),
-    flush=True,
-)
-
 #Etapa 1- Estoque
 
 supermercado_estoque = {
@@ -31,6 +21,43 @@ supermercado_estoque = {
     10: "Queijo Mussarela",
 }
 
+arquivo_dados = Path(__file__).with_name("dados.csv")
+custos_por_produto = {}
+with arquivo_dados.open(encoding="utf-8", newline="") as arquivo:
+    for numero_linha, linha in enumerate(csv.reader(arquivo), start=1):
+        if not linha:
+            continue
+        if len(linha) != 2:
+            raise ValueError(
+                f"Formato inválido na linha {numero_linha} de dados.csv: "
+                "esperado produto e custo."
+            )
+
+        produto, custo_texto = (campo.strip() for campo in linha)
+        if produto in custos_por_produto:
+            raise ValueError(
+                f"Produto duplicado na linha {numero_linha} de dados.csv: {produto}."
+            )
+
+        try:
+            custo = float(custo_texto.replace("R$", "").strip().replace(",", "."))
+        except ValueError as erro:
+            raise ValueError(
+                f"Custo inválido na linha {numero_linha} de dados.csv: "
+                f"{custo_texto!r}."
+            ) from erro
+
+        custos_por_produto[produto] = custo
+
+produtos_ausentes = set(supermercado_estoque.values()) - custos_por_produto.keys()
+produtos_desconhecidos = custos_por_produto.keys() - set(supermercado_estoque.values())
+if produtos_ausentes or produtos_desconhecidos:
+    raise ValueError(
+        "Os produtos de dados.csv não correspondem ao estoque. "
+        f"Ausentes: {sorted(produtos_ausentes)}; "
+        f"desconhecidos: {sorted(produtos_desconhecidos)}."
+    )
+
 #Etapa 2- Organização
 
 prateleira_estoque = [
@@ -38,13 +65,24 @@ prateleira_estoque = [
     [supermercado_estoque[codigo] for codigo in range(6, 11)],
 ]
 
-print("Matriz das prateleiras de estoque:")
+total_custos = sum(custos_por_produto.values())
+
+print("=" * 64)
+print("PAINEL DE ESTOQUE - Innovation Inc.")
+print("=" * 64)
 for numero_prateleira, prateleira in enumerate(prateleira_estoque, start=1):
-    posicoes = " | ".join(
-        f"Posição {numero_posicao}: {produto}"
-        for numero_posicao, produto in enumerate(prateleira, start=1)
-    )
-    print(f"Prateleira {numero_prateleira}: {posicoes}")
+    print(f"\nPrateleira {numero_prateleira}:")
+    for numero_posicao, produto in enumerate(prateleira, start=1):
+        custo = custos_por_produto[produto]
+        custo_formatado = f"{custo:.2f}".replace(".", ",")
+        print(
+            f"  Posição {numero_posicao}: {produto:<24} "
+            f"Custo: R$ {custo_formatado}"
+        )
+
+print("-" * 64)
+print(f"CUSTO TOTAL DO ESTOQUE: R$ {total_custos:.2f}".replace(".", ","))
+print("=" * 64)
 
 # Etapa 3- Menu
 
